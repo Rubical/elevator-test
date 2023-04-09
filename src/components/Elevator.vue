@@ -2,6 +2,9 @@
 import { store } from "@/store/store";
 
 export default {
+  props: {
+    elevator: {},
+  },
   computed: {
     floorHeight() {
       return store.state.floorHeight;
@@ -15,7 +18,17 @@ export default {
 
 <template>
   <div class="elevator-row">
-    <div class="elevator"></div>
+    <div
+      class="elevator"
+      :style="{
+        width: '100px',
+        height: floorHeight + 'px',
+        transition: `transform ${Math.abs(
+          elevator.floor - elevator.prevFloor
+        )}s ease-in`,
+        transform: `translateY( ${-floorHeight * (elevator.floor - 1)}px)`,
+      }"
+    ></div>
   </div>
 </template>
 
@@ -29,7 +42,6 @@ export default {
 
 .elevator {
   width: 100px;
-  height: 100px;
   background: aqua;
   position: absolute;
   bottom: 0;

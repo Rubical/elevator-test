@@ -9,11 +9,22 @@ export default {
     floorHeight() {
       return store.state.floorHeight;
     },
+    elevatorFloors() {
+      return store.state.elevatorFloors;
+    },
+  },
+  methods: {
+    moveElevator() {
+      this.$store.commit("moveElevator", {
+        index: this.elevatorFloors.findIndex((el) => el.isMoving !== true),
+        value: this.index,
+      });
+    },
   },
 };
 </script>
 <template>
-  <div class="elevator-btn" :style="{}">
+  <div @click="moveElevator()" class="elevator-btn">
     <button>
       <svg
         fill="#000000"
@@ -36,7 +47,7 @@ export default {
         </g>
       </svg>
     </button>
-    <p>{{ index + 1 }}</p>
+    <p>{{ index }}</p>
   </div>
 </template>
 

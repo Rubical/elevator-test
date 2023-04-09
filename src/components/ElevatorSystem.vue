@@ -12,14 +12,14 @@ export default defineComponent({
     floorsCount() {
       return floorsCount;
     },
-    elevatorCount() {
-      return elevatorCount;
-    },
   },
 
   computed: {
     floorHeight() {
       return store.state.floorHeight;
+    },
+    elevatorFloors() {
+      return store.state.elevatorFloors;
     },
   },
 });
@@ -27,7 +27,7 @@ export default defineComponent({
 <template>
   <div class="elevator-system">
     <div class="elevators">
-      <Elevator v-for="n in elevatorCount()" />
+      <Elevator v-for="elevator in elevatorFloors" :elevator="elevator" />
     </div>
     <div
       class="elevator-btns"
@@ -36,7 +36,7 @@ export default defineComponent({
         rowGap: floorHeight - 30 + 'px',
       }"
     >
-      <ElevatorBtn v-for="(n, idx) in floorsCount()" :index="idx" />
+      <ElevatorBtn v-for="(elevator, idx) in floorsCount()" :index="idx + 1" />
     </div>
   </div>
 </template>
