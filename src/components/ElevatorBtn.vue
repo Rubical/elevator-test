@@ -3,31 +3,50 @@ import { store } from "@/store/store";
 
 export default {
   props: {
-    index: Number,
+    elevatorBtn: {},
   },
   computed: {
     floorHeight() {
       return store.state.floorHeight;
     },
-    elevatorFloors() {
-      return store.state.elevatorFloors;
+    elevatorSystem() {
+      return store.state.elevatorSystem;
+    },
+    elevatorBtns() {
+      return store.state.elevatorBtns;
     },
   },
   methods: {
     moveElevator() {
+      let elevatorIndex = this.elevatorSystem.findIndex(
+        (el) => el.isMoving !== true
+      );
       this.$store.commit("moveElevator", {
-        index: this.elevatorFloors.findIndex((el) => el.isMoving !== true),
-        value: this.index,
+        index: elevatorIndex,
+        value: this.elevatorBtn.id,
       });
+      this.$store.commit("elevatorBtnMove", this.elevatorBtn.id - 1);
+      setTimeout(() => {
+        this.$store.commit("unpressElevatorBtn", this.elevatorBtn.id - 1);
+      }, this.elevatorBtn.elevatorMovingTime * 1000);
     },
+  },
+  mounted() {
+    console.log(this.elevatorBtn);
   },
 };
 </script>
 <template>
   <div @click="moveElevator()" class="elevator-btn">
-    <button>
+    <button
+      :style="{
+        border: elevatorBtn.isBtnPressed
+          ? '2px solid orange'
+          : '2px solid #2aa8a8',
+      }"
+    >
       <svg
-        fill="#000000"
+        :style="{ fill: elevatorBtn.isBtnPressed ? 'orange' : '#2aa8a8' }"
         height="20px"
         width="20px"
         viewBox="0 0 248.541 248.541"
@@ -47,7 +66,7 @@ export default {
         </g>
       </svg>
     </button>
-    <p>{{ index }}</p>
+    <p>{{ elevatorBtn.id }}</p>
   </div>
 </template>
 
@@ -65,14 +84,12 @@ button {
   justify-content: center;
   align-items: center;
   margin-right: 8px;
-  border: 2px solid #2aa8a8;
   background-color: white;
 }
 
 svg {
   width: 20px;
   height: 20px;
-  fill: #2aa8a8;
 }
 
 p {

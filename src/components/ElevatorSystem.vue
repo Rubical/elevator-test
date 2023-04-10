@@ -18,8 +18,11 @@ export default defineComponent({
     floorHeight() {
       return store.state.floorHeight;
     },
-    elevatorFloors() {
-      return store.state.elevatorFloors;
+    elevatorSystem() {
+      return store.state.elevatorSystem;
+    },
+    elevatorBtns() {
+      return store.state.elevatorBtns;
     },
   },
 });
@@ -27,7 +30,7 @@ export default defineComponent({
 <template>
   <div class="elevator-system">
     <div class="elevators">
-      <Elevator v-for="elevator in elevatorFloors" :elevator="elevator" />
+      <Elevator v-for="elevator in elevatorSystem" :elevator="elevator" />
     </div>
     <div
       class="elevator-btns"
@@ -36,7 +39,10 @@ export default defineComponent({
         rowGap: floorHeight - 30 + 'px',
       }"
     >
-      <ElevatorBtn v-for="(elevator, idx) in floorsCount()" :index="idx + 1" />
+      <ElevatorBtn
+        v-for="elevatorBtn in elevatorBtns"
+        :elevatorBtn="elevatorBtn"
+      />
     </div>
   </div>
 </template>
