@@ -18,21 +18,36 @@ export default {
   },
   methods: {
     moveElevator() {
-      let elevatorIndex = this.elevatorSystem.findIndex(
-        (el) => el.isMoving !== true
-      );
-      this.$store.commit("moveElevator", {
-        index: elevatorIndex,
-        value: this.elevatorBtn.id,
+      if (
+        this.elevatorSystem.find(
+          (elevator, index) => this.elevatorBtn.id === elevator.currentFloor
+        )
+      ) {
+        return;
+      }
+      let closestElIndex;
+      let smallestGap = 0;
+      this.elevatorSystem.forEach((elevator, index) => {
+        if (elevator.isMoving !== true && closestElIndex === undefined) {
+          (closestElIndex = index),
+            (smallestGap = Math.abs(
+              elevator.targetFloor - this.elevatorBtn.id
+            ));
+        }
+        if (
+          elevator.isMoving !== true &&
+          Math.abs(elevator.targetFloor - this.elevatorBtn.id) < smallestGap
+        ) {
+          closestElIndex = index;
+          smallestGap = Math.abs(elevator.targetFloor - this.elevatorBtn.id);
+        }
       });
-      this.$store.commit("elevatorBtnMove", this.elevatorBtn.id - 1);
-      setTimeout(() => {
-        this.$store.commit("unpressElevatorBtn", this.elevatorBtn.id - 1);
-      }, this.elevatorBtn.elevatorMovingTime * 1000);
+
+      this.$store.dispatch("moveElevator", {
+        closestElevatorNumber: closestElIndex + 1,
+        btnFloorNumber: this.elevatorBtn.id,
+      });
     },
-  },
-  mounted() {
-    console.log(this.elevatorBtn);
   },
 };
 </script>
@@ -46,7 +61,9 @@ export default {
       }"
     >
       <svg
-        :style="{ fill: elevatorBtn.isBtnPressed ? 'orange' : '#2aa8a8' }"
+        :style="{
+          fill: elevatorBtn.isBtnPressed ? 'orange' : '#2aa8a8',
+        }"
         height="20px"
         width="20px"
         viewBox="0 0 248.541 248.541"

@@ -1,7 +1,7 @@
 <script>
 import { defineComponent } from "vue";
 import Elevator from "@/components/Elevator.vue";
-import { elevatorCount, floorsCount } from "@/configuration/config";
+import { floorsCount } from "@/configuration/config";
 import ElevatorBtn from "@/components/ElevatorBtn.vue";
 import { store } from "@/store/store";
 
