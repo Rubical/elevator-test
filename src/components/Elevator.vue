@@ -119,7 +119,7 @@ export default {
 .elevator-floor {
   padding-top: 3px;
   color: white;
-  fontweight: 500;
+  font-weight: 500;
 }
 
 .elevator-direction-wrapper {
