@@ -31,9 +31,24 @@ export const store = createStore({
       elevatorBtns: new Array(floorsCount).fill(1).map((elevator, index) => {
         return {
           id: index + 1,
-          isBtnPressed: false,
+          isBtnPressed:
+            localStorage
+              .getItem("queue")
+              ?.substring(1, localStorage.getItem("queue")?.length - 1)
+              ?.split(",")
+              ?.includes(String(index + 1)) || false,
         };
       }),
+      elevatorCallQueue:
+        localStorage.getItem("queue")?.length > 2
+          ? localStorage
+              .getItem("queue")
+              ?.substring(1, localStorage.getItem("queue")?.length - 1)
+              ?.split(",")
+              ?.map((el) => {
+                return Number(el);
+              })
+          : [],
     };
   },
   mutations: {
@@ -103,29 +118,31 @@ export const store = createStore({
     unpressElevatorBtn(state, payload) {
       state.elevatorBtns[payload.btnFloorNumber - 1].isBtnPressed = false;
     },
+
+    addElementToQueue(state, payload) {
+      state.elevatorCallQueue.push(payload.btnFloorNumber);
+      localStorage.setItem("queue", JSON.stringify(state.elevatorCallQueue));
+    },
+
+    removeElementFromQueue(state) {
+      state.elevatorCallQueue.shift();
+      localStorage.setItem("queue", JSON.stringify(state.elevatorCallQueue));
+    },
   },
   actions: {
-    moveElevator({ commit }, payload) {
+    addElevToQueue({ commit }, payload) {
+      commit("pressElevatorBtn", payload);
+      commit("addElementToQueue", payload);
+    },
+
+    moveElevator({ commit, dispatch }, payload) {
+      commit("removeElementFromQueue");
       commit("elevatorStartMoving", payload);
       commit("setPrevFloor", payload);
       commit("setElevatorTargetFloor", payload);
-      commit("pressElevatorBtn", payload);
       commit("setElevatorMovingTime", payload);
       commit("setElevatorCurrentFloor", payload);
-
-      const currfloor = setInterval(() => {
-        commit("setElevatorCurrentFloor", payload);
-        commit("setElevatorMovingTime", payload);
-        if (
-          store.state.elevatorSystem[payload.closestElevatorNumber - 1]
-            .currentFloor -
-            store.state.elevatorSystem[payload.closestElevatorNumber - 1]
-              .targetFloor ===
-          0
-        ) {
-          clearInterval(currfloor);
-        }
-      }, 1000);
+      dispatch("getCurrentFloor", payload);
 
       setTimeout(() => {
         commit("unpressElevatorBtn", payload);
@@ -137,13 +154,8 @@ export const store = createStore({
       }, store.state.elevatorSystem[payload.closestElevatorNumber - 1].movingTime * 1000 + 3000);
     },
 
-    keepMoving({ commit }, payload) {
-      commit("elevatorStartMoving", payload);
-      commit("setPrevFloor", payload);
-      commit("pressElevatorBtn", payload);
-      commit("setElevatorMovingTime", payload);
-
-      const currfloor = setInterval(() => {
+    getCurrentFloor({ commit }, payload) {
+      const getCurrFloor = setInterval(() => {
         commit("setElevatorCurrentFloor", payload);
         commit("setElevatorMovingTime", payload);
         if (
@@ -153,9 +165,17 @@ export const store = createStore({
               .targetFloor ===
           0
         ) {
-          clearInterval(currfloor);
+          clearInterval(getCurrFloor);
         }
       }, 1000);
+    },
+
+    keepMoving({ commit, dispatch }, payload) {
+      commit("elevatorStartMoving", payload);
+      commit("setPrevFloor", payload);
+      commit("pressElevatorBtn", payload);
+      commit("setElevatorMovingTime", payload);
+      dispatch("getCurrentFloor", payload);
 
       setTimeout(() => {
         commit("unpressElevatorBtn", payload);

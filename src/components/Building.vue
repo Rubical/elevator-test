@@ -1,9 +1,9 @@
 <script>
 import { defineComponent } from "vue";
+import { store } from "@/store/store";
 import Floor from "@/components/Floor.vue";
 import Elevator from "@/components/Elevator.vue";
 import ElevatorSystem from "@/components/ElevatorSystem.vue";
-import { store } from "@/store/store";
 
 export default defineComponent({
   computed: {

@@ -9,23 +9,46 @@ export default {
     floorHeight() {
       return store.state.floorHeight;
     },
-    floorCount() {
-      return store.state.floorCount;
-    },
     elevatorSystem() {
       return store.state.elevatorSystem;
     },
+    elevatorCallQueue() {
+      return store.state.elevatorCallQueue;
+    },
   },
-  mounted() {
+
+  beforeMount() {
     if (
       this.elevatorSystem[this.elevator.id - 1].targetFloor !==
       this.elevatorSystem[this.elevator.id - 1].currentFloor
     ) {
       this.$store.dispatch("keepMoving", {
         closestElevatorNumber: this.elevator.id,
-        btnFloorNumber: Number(
-          localStorage.getItem("elevatorTarget" + this.elevator.id)
-        ),
+        btnFloorNumber: this.elevator.targetFloor,
+      });
+    }
+
+    if (this.elevatorCallQueue.length > this.elevatorSystem.length) {
+      let interval = setInterval(() => {
+        if (
+          this.elevator.isMoving === false &&
+          this.elevatorCallQueue.length > 0
+        ) {
+          this.$store.dispatch("moveElevator", {
+            closestElevatorNumber: this.elevator.id,
+            btnFloorNumber: this.elevatorCallQueue[0],
+          });
+
+          if (this.elevatorCallQueue.length === 0) {
+            clearInterval(interval);
+          }
+        }
+      }, 500);
+    }
+    if (this.elevatorCallQueue.length > 0 && this.elevator.isMoving === false) {
+      this.$store.dispatch("moveElevator", {
+        closestElevatorNumber: this.elevator.id,
+        btnFloorNumber: this.elevatorCallQueue[0],
       });
     }
   },

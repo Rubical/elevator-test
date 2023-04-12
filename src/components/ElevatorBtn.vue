@@ -6,53 +6,74 @@ export default {
     elevatorBtn: {},
   },
   computed: {
-    floorHeight() {
-      return store.state.floorHeight;
-    },
     elevatorSystem() {
       return store.state.elevatorSystem;
     },
-    elevatorBtns() {
-      return store.state.elevatorBtns;
+    elevatorCallQueue() {
+      return store.state.elevatorCallQueue;
     },
   },
   methods: {
-    moveElevator() {
+    elevatorMoveOnClick() {
       if (
         this.elevatorSystem.find(
-          (elevator, index) => this.elevatorBtn.id === elevator.currentFloor
+          (elevator) =>
+            this.elevatorBtn.id === elevator.targetFloor ||
+            this.elevatorCallQueue.includes(this.elevatorBtn.id)
         )
       ) {
         return;
       }
+
+      this.$store.dispatch("addElevToQueue", {
+        btnFloorNumber: this.elevatorBtn.id,
+      });
+
+      let interval;
+
+      if (this.elevatorSystem.find((elevator) => elevator.isMoving === false)) {
+        this.elevatorMove();
+      } else
+        interval = setInterval(() => {
+          if (
+            this.elevatorSystem.find((elevator) => elevator.isMoving === false)
+          ) {
+            this.elevatorMove();
+
+            clearInterval(interval);
+          }
+        }, 500);
+    },
+
+    elevatorMove() {
+      const nextFloor = this.elevatorCallQueue[0];
       let closestElIndex;
       let smallestGap = 0;
+
       this.elevatorSystem.forEach((elevator, index) => {
         if (elevator.isMoving !== true && closestElIndex === undefined) {
           (closestElIndex = index),
-            (smallestGap = Math.abs(
-              elevator.targetFloor - this.elevatorBtn.id
-            ));
+            (smallestGap = Math.abs(elevator.targetFloor - nextFloor));
         }
         if (
           elevator.isMoving !== true &&
-          Math.abs(elevator.targetFloor - this.elevatorBtn.id) < smallestGap
+          Math.abs(elevator.targetFloor - nextFloor) < smallestGap
         ) {
           closestElIndex = index;
-          smallestGap = Math.abs(elevator.targetFloor - this.elevatorBtn.id);
+          smallestGap = Math.abs(elevator.targetFloor - nextFloor);
         }
       });
 
       this.$store.dispatch("moveElevator", {
         closestElevatorNumber: closestElIndex + 1,
-        btnFloorNumber: this.elevatorBtn.id,
+        btnFloorNumber: nextFloor,
       });
     },
   },
 };
 </script>
 <template>
-  <div @click="moveElevator()" class="elevator-btn">
+  <div @click="elevatorMoveOnClick()" class="elevator-btn">
     <button
       :style="{
         border: elevatorBtn.isBtnPressed

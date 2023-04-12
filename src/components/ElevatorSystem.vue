@@ -1,18 +1,12 @@
 <script>
 import { defineComponent } from "vue";
+import { store } from "@/store/store";
 import Elevator from "@/components/Elevator.vue";
 import { floorsCount } from "@/configuration/config";
 import ElevatorBtn from "@/components/ElevatorBtn.vue";
-import { store } from "@/store/store";
 
 export default defineComponent({
   components: { ElevatorBtn, Elevator },
-
-  methods: {
-    floorsCount() {
-      return floorsCount;
-    },
-  },
 
   computed: {
     floorHeight() {
